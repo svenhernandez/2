@@ -1,66 +1,70 @@
 import React, { useState } from "react";
 
 const TransitionInput = ({ onTransitionSubmit }) => {
-  const [fromState, setFromState] = useState("");
+  const [from, setFrom] = useState("");
   const [symbol, setSymbol] = useState("");
-  const [toState, setToState] = useState("");
+  const [to, setTo] = useState("");
   const [transitions, setTransitions] = useState([]);
+
+  const handleAddTransition = () => {
+    if (from && symbol && to) {
+      const newTransition = { from, symbol, to };
+      setTransitions([...transitions, newTransition]);
+      setFrom("");
+      setSymbol("");
+      setTo("");
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Validación de campos vacíos
-    if (!fromState.trim() || !toState.trim() || symbol.trim() === "") {
-      alert("Por favor, completa todos los campos.");
-      return;
+    if (transitions.length > 0) {
+      onTransitionSubmit(transitions);
+      setTransitions([]);
     }
-
-    const newTransition = {
-      fromState: fromState.trim(),
-      symbol: symbol.trim() === "ε" ? "ε" : symbol.trim(),
-      toState: toState.trim(),
-    };
-
-    // Agregar transición a la lista
-    setTransitions([...transitions, newTransition]);
-    onTransitionSubmit(newTransition);
-
-    // Limpiar los inputs
-    setFromState("");
-    setSymbol("");
-    setToState("");
   };
 
   return (
-    <div>
-      <h2>Agregar Transiciones</h2>
-      <form onSubmit={handleSubmit}>
-        <label>Desde:</label>
-        <input type="text" value={fromState} onChange={(e) => setFromState(e.target.value)} />
+    <div className="transition-input">
+      <h3>Agregar Transiciones</h3>
+      <div>
+        <input
+          type="text"
+          placeholder="Estado origen (ej. q0)"
+          value={from}
+          onChange={(e) => setFrom(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Símbolo (ej. a, ε)"
+          value={symbol}
+          onChange={(e) => setSymbol(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Estado destino (ej. q1)"
+          value={to}
+          onChange={(e) => setTo(e.target.value)}
+        />
+        <button type="button" onClick={handleAddTransition}>
+          Agregar
+        </button>
+      </div>
 
-        <label>Símbolo (usar "ε" para transición vacía):</label>
-        <input type="text" value={symbol} onChange={(e) => setSymbol(e.target.value)} />
+      <div className="transitions-list">
+        <h4>Transiciones agregadas:</h4>
+        <ul>
+          {transitions.map((t, i) => (
+            <li key={i}>
+              {t.from} - {t.symbol} → {t.to}
+            </li>
+          ))}
+        </ul>
+      </div>
 
-        <label>Hacia:</label>
-        <input type="text" value={toState} onChange={(e) => setToState(e.target.value)} />
-
-        <button type="submit">Agregar Transición</button>
-      </form>
-
-      {transitions.length > 0 && (
-        <div>
-          <h3>Transiciones Agregadas:</h3>
-          <ul>
-            {transitions
-              .filter(t => t && t.fromState && t.toState) // Filtramos transiciones inválidas
-              .map((t, index) => (
-                <li key={index}>
-                  {t.fromState} -- {t.symbol} → {t.toState}
-                </li>
-              ))}
-          </ul>
-        </div>
-      )}
+      <button type="button" onClick={handleSubmit}>
+        Confirmar Transiciones
+      </button>
     </div>
   );
 };
